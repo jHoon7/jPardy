@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Favicon Generator</title>
+  <style>
+    @font-face {
+      font-family: 'Gyparody';
+      src: url('/fonts/gyparody.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+    }
+    #favicon-canvas {
+      background-color: #0000AA; /* Classic Jeopardy blue */
+      width: 64px;
+      height: 64px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .exclamation {
+      font-family: 'Gyparody', 'Korinna BT', serif;
+      font-size: 48px;
+      color: #F7D353; /* Jeopardy gold */
+      font-weight: bold;
+      line-height: 1;
+    }
+    .instructions {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 500px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #0000AA;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #000088;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h2>Favicon Generator</h2>
+    <p>This page displays the "!" character in the Gyparody font.</p>
+    <p>To create your favicon:</p>
+    <ol>
+      <li>Wait for the font to load properly</li>
+      <li>Click the "Download as PNG" button below</li>
+      <li>Use an online converter to convert the PNG to ICO format</li>
+      <li>Replace the existing favicon.ico in the public folder</li>
+    </ol>
+    <button id="download-btn">Download as PNG</button>
+  </div>
+
+  <div id="favicon-canvas">
+    <div class="exclamation">!</div>
+  </div>
+
+  <script>
+    document.getElementById('download-btn').addEventListener('click', function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      
+      // Draw background
+      ctx.fillStyle = '#0000AA';
+      ctx.fillRect(0, 0, 64, 64);
+      
+      // Draw text
+      ctx.fillStyle = '#F7D353';
+      ctx.font = 'bold 48px Gyparody, "Korinna BT", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('!', 32, 32);
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.download = 'favicon.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html> 

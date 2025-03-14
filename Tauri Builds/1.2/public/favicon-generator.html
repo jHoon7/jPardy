@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Favicon Generator</title>
+  <style>
+    @font-face {
+      font-family: 'Gyparody';
+      src: url('/fonts/gyparody.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+    }
+    #favicon-canvas {
+      background-color: #0000AA; /* Classic Jeopardy blue */
+      width: 64px;
+      height: 64px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .exclamation {
+      font-family: 'Gyparody', 'Korinna BT', serif;
+      font-size: 48px;
+      color: #F7D353; /* Jeopardy gold */
+      font-weight: bold;
+      line-height: 1;
+    }
+    .instructions {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h2>Favicon Generator</h2>
+    <p>This page displays the "!" character in the Gyparody font.</p>
+    <p>To create your favicon:</p>
+    <ol>
+      <li>Take a screenshot of the blue square with the "!" character</li>
+      <li>Open the screenshot in an image editor</li>
+      <li>Crop it to just the blue square</li>
+      <li>Save it as "favicon.ico" in the public folder</li>
+    </ol>
+    <p>Alternatively, you can use a browser extension or online tool to convert this page to a favicon.</p>
+  </div>
+
+  <div id="favicon-canvas">
+    <div class="exclamation">!</div>
+  </div>
+</body>
+</html> 

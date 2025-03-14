@@ -1,7 +1,29 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Star, X, Save, FolderOpen } from 'lucide-react';
+import { Star, X, Save, FolderOpen, Moon, Sun, Image, Upload, Coffee } from 'lucide-react';
+
+// Logo component
+const TopGumLogo = ({ darkMode }) => (
+  <div className="fixed bottom-8 right-4 z-10 flex flex-col items-center">
+    {darkMode ? (
+      <img 
+        src="/top-gum-logo-light.svg" 
+        alt="Top-Gum Logo" 
+        className="w-40 h-auto mb-0"
+      />
+    ) : (
+      <img 
+        src="/top-gum-logo.svg" 
+        alt="Top-Gum Logo" 
+        className="w-40 h-auto mb-0"
+      />
+    )}
+    <p className={`text-base font-bold -mt-4 ${darkMode ? 'text-white' : 'text-gray-700'}`}>
+      A Top Gum Study Tool
+    </p>
+  </div>
+);
 
 const JeopardyGame = () => {
   const defaultCategories = Array(6).fill('');
@@ -36,7 +58,6 @@ const JeopardyGame = () => {
   const [gameComplete, setGameComplete] = useState(false);
   const [winner, setWinner] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [traditionalMode, setTraditionalMode] = useState(false);
   const [scoredQuestions, setScoredQuestions] = useState(new Set());
   const [scoredHistory, setScoredHistory] = useState(new Map());
   const [editingExplanations, setEditingExplanations] = useState(new Set());
@@ -46,11 +67,41 @@ const JeopardyGame = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [isStealMode, setIsStealMode] = useState(false);
   const [stealFromTeamIndex, setStealFromTeamIndex] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
+  const [savedGames, setSavedGames] = useState([]);
+  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Load saved games when component mounts
+    const loadSavedGames = () => {
+      try {
+        const savedGamesString = localStorage.getItem('jeopardyGames');
+        if (savedGamesString) {
+          return JSON.parse(savedGamesString);
+        }
+      } catch (error) {
+        console.error('Error loading saved games:', error);
+      }
+      return [];
+    };
+    
+    setSavedGames(loadSavedGames());
   }, []);
+
+  // Apply dark mode to entire document body
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+      document.documentElement.style.backgroundColor = '#000';
+      document.body.style.backgroundColor = '#000';
+    } else {
+      document.body.classList.remove('dark-mode');
+      document.documentElement.style.backgroundColor = '#fff';
+      document.body.style.backgroundColor = '#fff';
+    }
+  }, [darkMode]);
 
   if (!isClient) {
     return null;
@@ -535,41 +586,38 @@ const JeopardyGame = () => {
 
   if (gameState === 'setup') {
     return (
-      <div className={`max-w-6xl mx-auto p-4 ${darkMode ? 'bg-black' : 'bg-white'}`}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-black'}`}>Game Setup</h2>
-          <div className="flex gap-2">
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <span>Traditional Mode</span>
-                <div
-                  onClick={() => setTraditionalMode(!traditionalMode)}
-                  className={`relative w-12 h-6 transition-colors duration-200 ease-in-out rounded-full ${
-                    traditionalMode ? 'bg-blue-500' : 'bg-gray-200'
-                  }`}
-                >
-                  <div
-                    className={`absolute w-4 h-4 transition-transform duration-200 ease-in-out transform bg-white rounded-full top-1 ${
-                      traditionalMode ? 'translate-x-7' : 'translate-x-1'
-                    }`}
-                  />
-                </div>
-              </label>
-            </div>
-            <input
-              type="text"
-              value={gameName}
-              onChange={(e) => setGameName(e.target.value)}
-              placeholder="Game Name"
-              className={`px-2 py-1 border rounded ${
-                darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
-              }`}
-            />
+      <div className={`h-screen w-full mx-auto p-2 pt-1 overflow-y-auto ${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+        <style jsx global>{`
+          body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+          }
+          @font-face {
+            font-family: 'Gyparody';
+            src: url('/fonts/gyparody.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+          }
+          @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+          .jpardy-title {
+            font-family: 'Gyparody', 'Korinna BT', 'ITC Korinna', 'Playfair Display', serif;
+            color: #F7D353;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.03em;
+            font-weight: bold;
+          }
+        `}</style>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             <button
               onClick={saveGame}
-              className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm sm:text-base"
             >
-              <Save className="h-4 w-4" />
+              <Save className="h-3 w-3 sm:h-4 sm:w-4" />
               Save Game
             </button>
             <label className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
@@ -605,34 +653,31 @@ const JeopardyGame = () => {
                 </svg>
                 Export Answers
               </button>
-              <div className="absolute left-0 mt-1 bg-white border rounded shadow-lg z-50 hidden">
+              <div className={`absolute left-0 mt-1 ${darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'} border rounded shadow-lg z-50 hidden export-dropdown`}>
                 <button
                   onClick={() => {
                     exportAnswers('markdown');
-                    const dropdown = document.querySelector('.export-dropdown');
-                    if (dropdown) dropdown.classList.add('hidden');
+                    document.querySelector('.export-dropdown').classList.add('hidden');
                   }}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 whitespace-nowrap"
+                  className={`block w-full text-left px-4 py-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} whitespace-nowrap`}
                 >
                   Export as Markdown (.md)
                 </button>
                 <button
                   onClick={() => {
                     exportAnswers('text');
-                    const dropdown = document.querySelector('.export-dropdown');
-                    if (dropdown) dropdown.classList.add('hidden');
+                    document.querySelector('.export-dropdown').classList.add('hidden');
                   }}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 whitespace-nowrap"
+                  className={`block w-full text-left px-4 py-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} whitespace-nowrap`}
                 >
                   Export as Text (.txt)
                 </button>
                 <button
                   onClick={() => {
                     exportAnswers('csv');
-                    const dropdown = document.querySelector('.export-dropdown');
-                    if (dropdown) dropdown.classList.add('hidden');
+                    document.querySelector('.export-dropdown').classList.add('hidden');
                   }}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 whitespace-nowrap"
+                  className={`block w-full text-left px-4 py-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} whitespace-nowrap`}
                 >
                   Export as CSV (.csv)
                 </button>
@@ -645,28 +690,35 @@ const JeopardyGame = () => {
               Reset to Defaults
             </button>
           </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setDarkMode(!darkMode)}
+              className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <span className={darkMode ? 'text-white' : 'text-black'}>Dark Mode</span>
-            <div
-              onClick={() => setDarkMode(!darkMode)}
-              className={`relative w-12 h-6 transition-colors duration-200 ease-in-out rounded-full ${
-                darkMode ? 'bg-blue-500' : 'bg-gray-200'
-              }`}
-            >
-              <div
-                className={`absolute w-4 h-4 transition-transform duration-200 ease-in-out transform bg-white rounded-full top-1 ${
-                  darkMode ? 'translate-x-7' : 'translate-x-1'
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+          <div className="lg:col-span-1 flex flex-col">
+            <div className="text-center mb-1">
+              <h2 className={`text-xl sm:text-2xl font-bold ${darkMode ? 'text-white' : 'text-black'}`}>Game Setup</h2>
+            </div>
+            
+            <div className="grid gap-2 mb-4">
+              <input
+                type="text"
+                value={gameName}
+                onChange={(e) => setGameName(e.target.value)}
+                placeholder="Game Name"
+                className={`w-full p-2 border rounded text-sm sm:text-base ${
+                  darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
                 }`}
               />
             </div>
-          </label>
-        </div>
-
-        <div className="flex gap-4">
-          <div className="flex-1">
+            
             <div className="grid gap-2 mb-4">
               <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-black'}`}>Team Names</h3>
               {teamNames.map((name, i) => (
@@ -684,7 +736,7 @@ const JeopardyGame = () => {
                   }`}
                 />
               ))}
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-1">
                 <button
                   onClick={addTeam}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -717,7 +769,7 @@ const JeopardyGame = () => {
                   {category || `Category ${i + 1}`}
                 </button>
               ))}
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-1">
                 <button
                   onClick={addCategory}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -732,11 +784,20 @@ const JeopardyGame = () => {
                 </button>
               </div>
             </div>
+            
+            <div className="mt-auto mb-4">
+              <button 
+                onClick={startGame} 
+                className="w-full px-6 py-2 bg-green-500 text-white text-lg font-semibold rounded hover:bg-green-600"
+              >
+                Start Game
+              </button>
+            </div>
           </div>
 
-          {selectedCategoryIndex !== null && (
-            <div className="flex-1">
-              <div className="grid gap-2 mb-4">
+          {selectedCategoryIndex !== null ? (
+            <div className="lg:col-span-2 lg:mt-[7.5rem]">
+              <div className="grid gap-2 mb-3">
                 <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-black'}`}>
                   {categories[selectedCategoryIndex] || `Category ${selectedCategoryIndex + 1}`} Questions
                 </h3>
@@ -748,156 +809,196 @@ const JeopardyGame = () => {
                     darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
                   }`}
                 />
-                <div className="grid gap-2">
-                  {questions[selectedCategoryIndex].map((q, questionIndex) => (
-                    <div key={`q-${selectedCategoryIndex}-${questionIndex}`} className="p-2 border rounded">
-                      <div className="grid gap-1">
-                        <div className="flex items-center gap-2">
-                          <input
-                            value={q.points}
-                            onChange={(e) => handleQuestionChange(selectedCategoryIndex, questionIndex, 'points', e.target.value)}
-                            type="number"
-                            placeholder="Points"
-                            className={`w-20 p-1 border rounded ${
-                              darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
-                            }`}
-                          />
-                          <button
-                            onClick={() => handleQuestionChange(selectedCategoryIndex, questionIndex, 'isDaily')}
-                            className={`flex items-center gap-1 px-2 py-1 rounded ${q.isDaily ? 'bg-blue-500 text-white' : 'border'}`}
-                          >
-                            <Star className="h-4 w-4" />
-                            Daily Double
-                          </button>
-                        </div>
+                
+                {/* Question tabs navigation */}
+                <div className="flex border-b border-gray-600 mt-3 overflow-x-auto">
+                  {questions[selectedCategoryIndex].map((q, index) => (
+                    <button
+                      key={`tab-${index}`}
+                      onClick={() => setSelectedQuestionIndex(index)}
+                      className={`py-2 px-4 font-medium ${
+                        selectedQuestionIndex === index
+                          ? darkMode 
+                            ? 'border-b-2 border-blue-500 text-blue-400' 
+                            : 'border-b-2 border-blue-500 text-blue-600'
+                          : darkMode
+                            ? 'text-gray-400 hover:text-gray-300'
+                            : 'text-gray-600 hover:text-gray-800'
+                      }`}
+                    >
+                      {q.points} pts
+                    </button>
+                  ))}
+                </div>
+
+                {/* Display only the selected question */}
+                {questions[selectedCategoryIndex][selectedQuestionIndex] && (
+                  <div className="p-2 border rounded mt-4">
+                    <div className="grid gap-1">
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={questions[selectedCategoryIndex][selectedQuestionIndex].points}
+                          onChange={(e) => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'points', e.target.value)}
+                          type="number"
+                          placeholder="Points"
+                          className={`w-20 p-1 border rounded ${
+                            darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
+                          }`}
+                        />
+                        <button
+                          onClick={() => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'isDaily')}
+                          className={`flex items-center gap-1 px-2 py-1 rounded ${questions[selectedCategoryIndex][selectedQuestionIndex].isDaily ? 'bg-blue-500 text-white' : 'border'}`}
+                        >
+                          <Star className="h-4 w-4" />
+                          Daily Double
+                        </button>
+                      </div>
+                      <div className="relative">
                         <textarea
-                          value={q.question}
-                          onChange={(e) => handleQuestionChange(selectedCategoryIndex, questionIndex, 'question', e.target.value)}
+                          value={questions[selectedCategoryIndex][selectedQuestionIndex].question}
+                          onChange={(e) => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'question', e.target.value)}
                           placeholder="Question"
-                          className={`w-full p-1 border rounded min-h-[60px] resize-y whitespace-pre-wrap ${
+                          className={`w-full p-2 border rounded min-h-[120px] resize-y whitespace-pre-wrap ${
                             darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
                           }`}
                           style={{ fontFamily: 'inherit' }}
                         />
-                        <div className="flex items-center gap-2">
-                          <label className="flex-1">
-                            <div className={`w-full p-2 border rounded text-center cursor-pointer ${
-                              darkMode ? 'bg-gray-800 text-white border-gray-600 hover:bg-gray-700' : 'bg-white text-black hover:bg-gray-50'
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <label className="cursor-pointer">
+                            <div className={`p-1 rounded-full flex items-center gap-1 hover:bg-opacity-80 ${
+                              darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
                             }`}>
-                              {q.questionImage ? 'Change Question Image' : 'Upload Question Image'}
+                              <Upload className="h-4 w-4" />
+                              <span className="text-xs">Image</span>
                             </div>
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => handleImageUpload(selectedCategoryIndex, questionIndex, 'questionImage', e)}
+                              onChange={(e) => handleImageUpload(selectedCategoryIndex, selectedQuestionIndex, 'questionImage', e)}
                               className="hidden"
                             />
                           </label>
-                          {q.questionImage && (
+                          {questions[selectedCategoryIndex][selectedQuestionIndex].questionImage && (
                             <button
-                              onClick={() => handleQuestionChange(selectedCategoryIndex, questionIndex, 'questionImage', '')}
-                              className="p-2 text-red-500 hover:text-red-700"
+                              onClick={() => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'questionImage', '')}
+                              className="p-1 text-red-500 hover:bg-gray-200 hover:bg-opacity-20 rounded-full"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           )}
                         </div>
-                        {q.questionImage && (
-                          <div className="relative w-full h-32 bg-gray-100 rounded">
-                            <img
-                              src={q.questionImage}
-                              alt="Question preview"
-                              className="absolute inset-0 w-full h-full object-contain"
-                            />
-                          </div>
-                        )}
+                      </div>
+                      {questions[selectedCategoryIndex][selectedQuestionIndex].questionImage && (
+                        <div className="relative w-full h-32 bg-gray-100 rounded">
+                          <img
+                            src={questions[selectedCategoryIndex][selectedQuestionIndex].questionImage}
+                            alt="Question preview"
+                            className="absolute inset-0 w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
+                      <div className="relative">
                         <textarea
-                          value={q.answer}
-                          onChange={(e) => handleQuestionChange(selectedCategoryIndex, questionIndex, 'answer', e.target.value)}
+                          value={questions[selectedCategoryIndex][selectedQuestionIndex].answer}
+                          onChange={(e) => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'answer', e.target.value)}
                           placeholder="Answer"
-                          className={`w-full p-1 border rounded min-h-[60px] resize-y whitespace-pre-wrap ${
+                          className={`w-full p-2 border rounded min-h-[120px] resize-y whitespace-pre-wrap ${
                             darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
                           }`}
                           style={{ fontFamily: 'inherit' }}
                         />
-                        <div className="flex items-center gap-2">
-                          <label className="flex-1">
-                            <div className={`w-full p-2 border rounded text-center cursor-pointer ${
-                              darkMode ? 'bg-gray-800 text-white border-gray-600 hover:bg-gray-700' : 'bg-white text-black hover:bg-gray-50'
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <label className="cursor-pointer">
+                            <div className={`p-1 rounded-full flex items-center gap-1 hover:bg-opacity-80 ${
+                              darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
                             }`}>
-                              {q.answerImage ? 'Change Answer Image' : 'Upload Answer Image'}
+                              <Upload className="h-4 w-4" />
+                              <span className="text-xs">Image</span>
                             </div>
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => handleImageUpload(selectedCategoryIndex, questionIndex, 'answerImage', e)}
+                              onChange={(e) => handleImageUpload(selectedCategoryIndex, selectedQuestionIndex, 'answerImage', e)}
                               className="hidden"
                             />
                           </label>
-                          {q.answerImage && (
+                          {questions[selectedCategoryIndex][selectedQuestionIndex].answerImage && (
                             <button
-                              onClick={() => handleQuestionChange(selectedCategoryIndex, questionIndex, 'answerImage', '')}
-                              className="p-2 text-red-500 hover:text-red-700"
+                              onClick={() => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'answerImage', '')}
+                              className="p-1 text-red-500 hover:bg-gray-200 hover:bg-opacity-20 rounded-full"
                             >
                               <X className="h-4 w-4" />
                             </button>
                           )}
                         </div>
-                        {(editingExplanations.has(`${selectedCategoryIndex}-${questionIndex}`) || q.explanation) ? (
-                          <>
+                      </div>
+                      {questions[selectedCategoryIndex][selectedQuestionIndex].answerImage && (
+                        <div className="relative w-full h-32 bg-gray-100 rounded">
+                          <img
+                            src={questions[selectedCategoryIndex][selectedQuestionIndex].answerImage}
+                            alt="Answer preview"
+                            className="absolute inset-0 w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
+                      {(editingExplanations.has(`${selectedCategoryIndex}-${selectedQuestionIndex}`) || questions[selectedCategoryIndex][selectedQuestionIndex].explanation) ? (
+                        <>
+                          <div className="relative">
                             <textarea
-                              value={q.explanation}
-                              onChange={(e) => handleQuestionChange(selectedCategoryIndex, questionIndex, 'explanation', e.target.value)}
+                              value={questions[selectedCategoryIndex][selectedQuestionIndex].explanation}
+                              onChange={(e) => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'explanation', e.target.value)}
                               placeholder="Explanation (optional)"
-                              className={`w-full p-1 border rounded min-h-[60px] resize-y whitespace-pre-wrap ${
+                              className={`w-full p-2 border rounded min-h-[100px] resize-y whitespace-pre-wrap ${
                                 darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
                               }`}
                             />
-                            <div className="flex items-center gap-2">
-                              <label className="flex-1">
-                                <div className={`w-full p-2 border rounded text-center cursor-pointer ${
-                                  darkMode ? 'bg-gray-800 text-white border-gray-600 hover:bg-gray-700' : 'bg-white text-black hover:bg-gray-50'
+                            <div className="absolute top-2 right-2 flex gap-1">
+                              <label className="cursor-pointer">
+                                <div className={`p-1 rounded-full flex items-center gap-1 hover:bg-opacity-80 ${
+                                  darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
                                 }`}>
-                                  {q.explanationImage ? 'Change Explanation Image' : 'Upload Explanation Image'}
+                                  <Upload className="h-4 w-4" />
+                                  <span className="text-xs">Image</span>
                                 </div>
                                 <input
                                   type="file"
                                   accept="image/*"
-                                  onChange={(e) => handleImageUpload(selectedCategoryIndex, questionIndex, 'explanationImage', e)}
+                                  onChange={(e) => handleImageUpload(selectedCategoryIndex, selectedQuestionIndex, 'explanationImage', e)}
                                   className="hidden"
                                 />
                               </label>
-                              {q.explanationImage && (
+                              {questions[selectedCategoryIndex][selectedQuestionIndex].explanationImage && (
                                 <button
-                                  onClick={() => handleQuestionChange(selectedCategoryIndex, questionIndex, 'explanationImage', '')}
-                                  className="p-2 text-red-500 hover:text-red-700"
+                                  onClick={() => handleQuestionChange(selectedCategoryIndex, selectedQuestionIndex, 'explanationImage', '')}
+                                  className="p-1 text-red-500 hover:bg-gray-200 hover:bg-opacity-20 rounded-full"
                                 >
                                   <X className="h-4 w-4" />
                                 </button>
                               )}
                             </div>
-                            {q.explanationImage && (
-                              <div className="relative w-full h-32 bg-gray-100 rounded">
-                                <img
-                                  src={q.explanationImage}
-                                  alt="Explanation preview"
-                                  className="absolute inset-0 w-full h-full object-contain"
-                                />
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => toggleExplanationEdit(selectedCategoryIndex, questionIndex)}
-                            className="w-full p-1 border rounded text-gray-600 hover:bg-gray-50"
-                          >
-                            + Add Explanation
-                          </button>
-                        )}
-                      </div>
+                          </div>
+                          {questions[selectedCategoryIndex][selectedQuestionIndex].explanationImage && (
+                            <div className="relative w-full h-32 bg-gray-100 rounded">
+                              <img
+                                src={questions[selectedCategoryIndex][selectedQuestionIndex].explanationImage}
+                                alt="Explanation preview"
+                                className="absolute inset-0 w-full h-full object-contain"
+                              />
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => toggleExplanationEdit(selectedCategoryIndex, selectedQuestionIndex)}
+                          className="w-full p-1 border rounded text-gray-600 hover:bg-gray-50"
+                        >
+                          + Add Explanation
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+                
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={addQuestion}
@@ -914,40 +1015,109 @@ const JeopardyGame = () => {
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="lg:col-span-2 flex items-center justify-center">
+              <h1 className="jpardy-title text-7xl sm:text-8xl md:text-9xl font-bold">jPardy!</h1>
+            </div>
           )}
         </div>
-
-        <button 
-          onClick={startGame} 
-          className="w-full bg-blue-500 text-white py-1 rounded hover:bg-blue-600"
-        >
-          Start Game
-        </button>
+        
+        {/* Version number */}
+        <div className="fixed bottom-2 left-5 z-10">
+          <a 
+            href="https://github.com/jHoon7/jPardy" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`text-xs ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800'}`}
+          >
+            v1.2
+          </a>
+        </div>
+        
+        {/* Buy Me a Coffee button */}
+        <div className="fixed bottom-8 left-4 z-10">
+          <a 
+            href="https://www.buymeacoffee.com/jHoon" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center justify-center p-2 rounded-full bg-[#F5DD4D] hover:bg-[#f0d331] text-black transition-colors shadow-md"
+            aria-label="Buy me a coffee"
+          >
+            <Coffee className="h-5 w-5" />
+          </a>
+        </div>
+        
+        {/* Top-Gum Logo */}
+        <TopGumLogo darkMode={darkMode} />
       </div>
     );
   }
 
   return (
-    <div className={`max-w-6xl mx-auto p-4 ${darkMode ? 'bg-black' : 'bg-white'}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-black'}`}>{gameName || 'Untitled Game'}</h2>
-        <button
-          onClick={() => setGameState('setup')}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
-          Back to Setup
-        </button>
+    <div className={`h-screen w-full mx-auto p-4 overflow-y-auto ${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+      <style jsx global>{`
+        body, html {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          overflow: hidden;
+        }
+        @font-face {
+          font-family: 'Gyparody';
+          src: url('/fonts/gyparody.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+        .jpardy-title {
+          font-family: 'Gyparody', 'Korinna BT', 'ITC Korinna', 'Playfair Display', serif;
+          color: #F7D353;
+          text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+          letter-spacing: -0.03em;
+          font-weight: bold;
+        }
+      `}</style>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setGameState('setup')}
+            className="px-3 py-1 sm:px-4 sm:py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm sm:text-base"
+          >
+            Back to Setup
+          </button>
+        </div>
+        <div>
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
-      <div className="flex justify-between mb-4">
+      {/* Centered Game Title */}
+      <div className="text-center mb-6">
+        <h1 
+          className="jpardy-title text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-300 tracking-wider"
+          style={{ textShadow: darkMode ? "2px 2px 4px rgba(0,0,0,0.5)" : "2px 2px 4px rgba(0,0,0,0.3)" }}
+        >
+          {gameName || 'Untitled Game'}
+        </h1>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
         {teamNames.map((name, index) => (
-          <div key={`score-${index}`} className={`text-xl flex items-center gap-2 ${darkMode ? 'text-white' : 'text-black'}`}>
+          <div key={`score-${index}`} className={`text-base sm:text-xl flex items-center gap-2 ${darkMode ? 'text-white' : 'text-black'}`}>
             {name}:
             <input
               type="number"
               value={scores[index]}
               onChange={(e) => handleScoreEdit(index, e.target.value)}
-              className={`w-24 px-2 py-1 border rounded ${
+              className={`w-16 sm:w-24 px-2 py-1 border rounded ${
                 darkMode ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black'
               }`}
               placeholder="Score"
@@ -958,11 +1128,11 @@ const JeopardyGame = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 mb-8">
         {categories.map((category, categoryIndex) => (
           <div key={`category-${categoryIndex}`} className="text-center">
-            <div className="font-bold p-2 bg-blue-950 text-white rounded h-24 flex items-center justify-center overflow-hidden">
-              <p className="text-sm sm:text-base md:text-lg line-clamp-3 px-2">
+            <div className="font-bold p-2 bg-blue-950 text-white rounded h-16 sm:h-24 flex items-center justify-center overflow-hidden">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg line-clamp-3 px-1 sm:px-2">
                 {category}
               </p>
             </div>
@@ -974,11 +1144,11 @@ const JeopardyGame = () => {
                 <button
                   key={`q-${categoryIndex}-${questionIndex}`}
                   onClick={() => revealQuestion(categoryIndex, questionIndex)}
-                  className={`h-24 w-full mt-2 ${
+                  className={`h-12 sm:h-16 md:h-20 lg:h-24 w-full mt-2 ${
                     isScored ? 'bg-gray-400' : 'bg-blue-500'
                   } rounded hover:${
                     isScored ? 'bg-gray-500' : 'bg-blue-600'
-                  } text-yellow-300 font-bold`}
+                  } text-yellow-300 font-bold text-xs sm:text-sm md:text-base lg:text-lg`}
                 >
                   {question.points}
                 </button>
@@ -1085,54 +1255,28 @@ const JeopardyGame = () => {
                   </div>
                   
                   <div className="text-center py-12">
-                    {traditionalMode ? (
-                      showAnswer ? (
-                        <div>
-                          <p className="text-4xl font-bold mb-8 whitespace-pre-wrap">{currentQuestion.question}</p>
-                          {currentQuestion.questionImage && (
-                            <img 
-                              src={currentQuestion.questionImage} 
-                              alt="Question visual"
-                              className="max-w-md mx-auto mb-8"
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-4xl font-bold mb-8 whitespace-pre-wrap">{currentQuestion.answer}</p>
-                          {currentQuestion.answerImage && (
-                            <img 
-                              src={currentQuestion.answerImage} 
-                              alt="Answer visual"
-                              className="max-w-md mx-auto mb-8"
-                            />
-                          )}
-                        </div>
-                      )
+                    {showAnswer ? (
+                      <div>
+                        <p className="text-4xl font-bold mb-8 whitespace-pre-wrap">{currentQuestion.answer}</p>
+                        {currentQuestion.answerImage && (
+                          <img 
+                            src={currentQuestion.answerImage} 
+                            alt="Answer visual"
+                            className="max-w-md mx-auto mb-8"
+                          />
+                        )}
+                      </div>
                     ) : (
-                      showAnswer ? (
-                        <div>
-                          <p className="text-4xl font-bold mb-8 whitespace-pre-wrap">{currentQuestion.answer}</p>
-                          {currentQuestion.answerImage && (
-                            <img 
-                              src={currentQuestion.answerImage} 
-                              alt="Answer visual"
-                              className="max-w-md mx-auto mb-8"
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-4xl font-bold mb-8 whitespace-pre-wrap">{currentQuestion.question}</p>
-                          {currentQuestion.questionImage && (
-                            <img 
-                              src={currentQuestion.questionImage} 
-                              alt="Question visual"
-                              className="max-w-md mx-auto mb-8"
-                            />
-                          )}
-                        </div>
-                      )
+                      <div>
+                        <p className="text-4xl font-bold mb-8 whitespace-pre-wrap">{currentQuestion.question}</p>
+                        {currentQuestion.questionImage && (
+                          <img 
+                            src={currentQuestion.questionImage} 
+                            alt="Question visual"
+                            className="max-w-md mx-auto mb-8"
+                          />
+                        )}
+                      </div>
                     )}
                   </div>
                   
@@ -1180,7 +1324,7 @@ const JeopardyGame = () => {
                       onClick={() => setShowAnswer(true)}
                       className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
                     >
-                      Show {traditionalMode ? 'Question' : 'Answer'}
+                      Show Answer
                     </button>
                   )}
 
